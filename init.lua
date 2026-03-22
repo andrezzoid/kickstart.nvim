@@ -603,7 +603,8 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
-        -- ts_ls = {},
+        ts_ls = {},
+        tailwindcss = {},
 
         stylua = {}, -- Used to format Lua code
 
@@ -690,62 +691,19 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
-        ['_'] = function(bufnr)
-          local bufname = vim.api.nvim_buf_get_name(bufnr)
-
-          -- Filetypes supported by biome
-          local biome_supported = {
-            javascript = true,
-            javascriptreact = true,
-            typescript = true,
-            typescriptreact = true,
-            json = true,
-            jsonc = true,
-            css = true,
-            graphql = true,
-            html = true,
-            vue = true,
-            svelte = true,
-            astro = true,
-          }
-
-          -- Check for biome config in project
-          local has_biome = vim.fs.find({ 'biome.json', 'biome.jsonc' }, {
-            upward = true,
-            path = bufname,
-            stop = vim.uv.os_homedir(),
-          })[1]
-
-          -- Check for prettier config in project
-          local has_prettier = vim.fs.find({
-            '.prettierrc',
-            '.prettierrc.json',
-            '.prettierrc.js',
-            '.prettierrc.cjs',
-            '.prettierrc.mjs',
-            '.prettierrc.yaml',
-            '.prettierrc.yml',
-            '.prettierrc.toml',
-            'prettier.config.js',
-            'prettier.config.cjs',
-            'prettier.config.mjs',
-          }, {
-            upward = true,
-            path = bufname,
-            stop = vim.uv.os_homedir(),
-          })[1]
-
-          local filetype = vim.bo[bufnr].filetype
-
-          -- Use biome for supported filetypes when biome config exists
-          if has_biome and biome_supported[filetype] then return { 'biome' } end
-
-          -- Use prettier for everything else when prettier config exists
-          if has_prettier then return { 'prettierd', 'prettier', stop_after_first = true } end
-
-          -- No project formatter config found, fall back to LSP
-          return {}
-        end,
+        -- For JS/TS: biome handles formatting via its LSP, so conform only
+        -- needs to cover projects using prettier or oxfmt. LSP fallback
+        -- catches everything else.
+        javascript = { 'oxfmt', 'prettierd', 'prettier', stop_after_first = true },
+        javascriptreact = { 'oxfmt', 'prettierd', 'prettier', stop_after_first = true },
+        typescript = { 'oxfmt', 'prettierd', 'prettier', stop_after_first = true },
+        typescriptreact = { 'oxfmt', 'prettierd', 'prettier', stop_after_first = true },
+        json = { 'oxfmt', 'prettierd', 'prettier', stop_after_first = true },
+        jsonc = { 'oxfmt', 'prettierd', 'prettier', stop_after_first = true },
+        css = { 'oxfmt', 'prettierd', 'prettier', stop_after_first = true },
+        html = { 'oxfmt', 'prettierd', 'prettier', stop_after_first = true },
+        yaml = { 'oxfmt', 'prettierd', 'prettier', stop_after_first = true },
+        markdown = { 'oxfmt', 'prettierd', 'prettier', stop_after_first = true },
       },
     },
   },
